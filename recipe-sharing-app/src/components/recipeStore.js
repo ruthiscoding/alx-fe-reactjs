@@ -1,10 +1,28 @@
-import { create } from "zustand";
+// src/components/RecipeList.jsx
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { useRecipeStore } from "./recipeStore";
 
-const useRecipeStore = create((set) => ({
-  recipes: [],
-  addRecipe: (newRecipe) =>
-    set((state) => ({ recipes: [...state.recipes, newRecipe] })),
-  setRecipes: (recipes) => set({ recipes }),
-}));
+const RecipeList = () => {
+  const recipes = useRecipeStore((state) => state.filteredRecipes);
+  const filterRecipes = useRecipeStore((state) => state.filterRecipes);
 
-export { useRecipeStore };
+  useEffect(() => {
+    filterRecipes();
+  }, [filterRecipes]);
+
+  return (
+    <div>
+      {recipes.map((recipe) => (
+        <div key={recipe.id}>
+          <h3>
+            <Link to={`/recipe/${recipe.id}`}>{recipe.title}</Link>
+          </h3>
+          <p>{recipe.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default RecipeList;
