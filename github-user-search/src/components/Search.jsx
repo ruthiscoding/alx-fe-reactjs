@@ -3,46 +3,38 @@ import { fetchUserData } from "../services/githubService";
 
 const Search = () => {
   const [username, setUsername] = useState("");
-  const [userData, setUserData] = useState(null);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleInputChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleFormSubmit = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setUserData(null);
+    setError(null);
 
     try {
       const data = await fetchUserData(username);
-      setUserData(data);
-    } catch (error) {
-      setError("Looks like we cant find the user");
+      setUsers(data.items);
+    } catch (err) {
+      setError("Looks like we can't find any users");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="search-container h-screen">
-      <form
-        onSubmit={handleFormSubmit}
-        className="w-full flex flex-col items-center justify-center gap-4"
-      >
+    <div>
+      <form onSubmit={handleSearch}>
         <input
           type="text"
-          placeholder="Search GitHub Username"
           value={username}
-          onChange={handleInputChange}
-          className="p-2 border border-blue-300 rounded"
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter GitHub username"
+          className="border p-2 rounded-md"
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+          className="border p-2 rounded-md bg-blue-500 text-white hover:bg-blue-400"
         >
           Search
         </button>
@@ -50,23 +42,19 @@ const Search = () => {
 
       {loading && <p>Loading...</p>}
       {error && <p>{error}</p>}
-      {userData && (
-        <div className="user-details lex flex-col items-center justify-center">
-          <img
-            src={userData.avatar_url}
-            alt={userData.login}
-            className="avatar "
-          />
-          <h2>{userData.name}</h2>
-          <p>
-            <a
-              href={userData.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Visit Profile
-            </a>
-          </p>
+
+      {users.length > 0 && (
+        <div>
+          {users.map((user) => (
+            <div key={user.id}>
+              <h2>{user.login}</h2>
+              <p>Location: {user.location ? user.location : "Not specified"}</p>
+              <p>Public Repositories: {user.public_repos}</p>
+              <a href={user.html_url} target="_blank" rel="noopener noreferrer">
+                View Profile
+              </a>
+            </div>
+          ))}
         </div>
       )}
     </div>
